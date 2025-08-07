@@ -14,16 +14,16 @@ body.high{--bg:#000;--fg:#fff;--accent:#FFD700;}
 .topbar{position:absolute;top:0;left:0;width:100%;height:40px;background:#111;display:flex;justify-content:space-around;align-items:center;font-size:14px;pointer-events:auto;}
 .progress{width:100px;height:8px;background:#444;border-radius:4px;overflow:hidden;}
 .progress div{height:100%;width:0%;background:var(--accent);}
-#main{position:absolute;top:40px;bottom:120px;left:0;right:0;display:flex;justify-content:center;align-items:center;pointer-events:auto;}
-#tabs{position:absolute;bottom:0;left:0;width:100%;height:120px;background:#111;display:flex;flex-direction:column;pointer-events:auto;}
+#main{position:absolute;top:40px;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;pointer-events:auto;}
+#tabs{position:absolute;bottom:0;left:0;width:100%;background:#111;display:flex;flex-direction:column;pointer-events:auto;}
 .tab-buttons{display:flex;height:40px;}
 .tab-buttons button{flex:1;}
-.tab-content{flex:1;overflow-y:auto;}
+.tab-content{flex:0 0 auto;overflow-y:visible;}
 .card{border:1px solid #555;margin:4px;padding:4px;border-radius:4px;font-size:14px;}
 .card button{width:100%;margin-top:4px;height:30px;}
 button{background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:14px;}
 .hide{display:none;}
-#toast{position:absolute;left:50%;bottom:130px;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:4px;opacity:0;transition:opacity .3s;font-size:14px;}
+#toast{position:absolute;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:4px;opacity:0;transition:opacity .3s;font-size:14px;}
 </style>
 </head>
 <body>
@@ -102,6 +102,14 @@ const tabContents={
 };
 const cookBtn=document.getElementById("cookBtn");
 const toastEl=document.getElementById("toast");
+const mainEl=document.getElementById("main");
+const tabsEl=document.getElementById("tabs");
+
+function adjustTabsHeight(){
+ const h=tabsEl.offsetHeight;
+ mainEl.style.bottom=h+"px";
+ toastEl.style.bottom=h+10+"px";
+}
 
 // 숫자 포맷
 function fmt(n){if(n>=1e9)return(n/1e9).toFixed(1)+"B";if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n.toFixed(0);}
@@ -127,6 +135,7 @@ function renderCards(){
    div.appendChild(card);
   });
  });
+ adjustTabsHeight();
 }
 
 // 구매 처리
@@ -207,6 +216,7 @@ cookBtn.addEventListener("click",()=>{state.ingredients+=1;vibrate(20);});
 tabButtons.forEach(btn=>btn.addEventListener("click",()=>{
  const id=btn.dataset.tab;
  Object.keys(tabContents).forEach(k=>tabContents[k].classList.toggle("hide",k!==id));
+ adjustTabsHeight();
 }));
 
 // 토스트 표시
