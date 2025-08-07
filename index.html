@@ -2,11 +2,11 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>용사식당 타이쿤</title>
 <style>
 :root{--bg:#222;--fg:#fff;--accent:#5C7CFA;}
-body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;color:var(--fg);overflow:hidden;}
+body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;color:var(--fg);}
 body.high{--bg:#000;--fg:#fff;--accent:#FFD700;}
 #wrap{position:relative;width:360px;height:640px;background:var(--bg);color:var(--fg);transform-origin:top left;}
 #game{position:absolute;left:0;top:0;width:360px;height:320px;background:#333;}
@@ -24,7 +24,6 @@ body.high{--bg:#000;--fg:#fff;--accent:#FFD700;}
 button{background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:14px;}
 .hide{display:none;}
 #toast{position:absolute;left:50%;bottom:130px;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:4px;opacity:0;transition:opacity .3s;font-size:14px;}
-#tutorial{position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;text-align:center;font-size:18px;}
 </style>
 </head>
 <body>
@@ -57,7 +56,6 @@ button{background:var(--accent);color:#fff;border:none;border-radius:4px;font-si
 </div>
 </div>
 <div id="toast"></div>
-<div id="tutorial"></div>
 </div>
 </div>
 <script>
@@ -104,7 +102,6 @@ const tabContents={
 };
 const cookBtn=document.getElementById("cookBtn");
 const toastEl=document.getElementById("toast");
-const tutorialEl=document.getElementById("tutorial");
 
 // 숫자 포맷
 function fmt(n){if(n>=1e9)return(n/1e9).toFixed(1)+"B";if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e3)return(n/1e3).toFixed(1)+"K";return n.toFixed(0);}
@@ -242,9 +239,6 @@ document.getElementById("iapBtn").onclick=()=>showToast("준비중");
 // 자동 저장
 setInterval(save,10000);
 
-// 튜토리얼
-tutorialEl.textContent="화면 중앙을 탭하면 요리가 준비돼요! (터치)";
-tutorialEl.addEventListener("pointerdown",()=>{tutorialEl.style.display="none";});
 
 // 초기 실행
 load();
