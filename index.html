@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Grow Ball Tycoon</title>
   <style>
     body { margin: 0; font-family: sans-serif; }
@@ -12,7 +13,7 @@
 </head>
 <body>
   <div>골드: <span id="gold">0</span></div>
-  <canvas id="game" width="600" height="400"></canvas>
+  <canvas id="game" width="1280" height="720"></canvas>
   <div id="panel">
     <button id="add">공 추가</button>
     <button id="speed">속도 +</button>
@@ -28,13 +29,13 @@
     const ctx = canvas.getContext('2d');
 
     const gravity = 0.3;
-    const baseDy = 8;
+    const baseDy = 4;
     const starSize = 25;
     const ballSize = 30;
 
     let defaultFloorReward = 1;
     let defaultWallReward = 2;
-    let defaultDx = 4;
+    let defaultDx = 1;
     let defaultAtk = 1;
 
     let costAdd = 10;
