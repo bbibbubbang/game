@@ -83,6 +83,8 @@
     }
 
     function update(dt) {
+      const scale = dt * 60; // normalize movement for frame drops
+
       starTimer += dt;
       if (starTimer >= starSpawnInterval) {
         starTimer = 0;
@@ -90,7 +92,7 @@
       }
 
       if (star && star.falling) {
-        star.y += 3; // fall speed
+        star.y += 3 * scale; // fall speed
         if (star.y + starSize >= canvas.height) {
           gold += defaultFloorReward * 100;
           star = null;
@@ -102,9 +104,9 @@
       }
 
       balls.forEach(ball => {
-        ball.dy += gravity;
-        ball.x += ball.dx;
-        ball.y += ball.dy;
+        ball.dy += gravity * scale;
+        ball.x += ball.dx * scale;
+        ball.y += ball.dy * scale;
 
         if (ball.y + ballSize >= canvas.height) {
           ball.y = canvas.height - ballSize;
