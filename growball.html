@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grow Ball Tycoon</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #panel { margin-top: 4px; }
+    #panel button { margin: 2px; }
+    canvas { background: #fff; display: block; }
+  </style>
+</head>
+<body>
+  <div>골드: <span id="gold">0</span></div>
+  <canvas id="game" width="600" height="400"></canvas>
+  <div id="panel">
+    <button id="add">공 추가</button>
+    <button id="speed">속도 +</button>
+    <button id="floor">땅 보상 +</button>
+    <button id="wall">벽 보상 +</button>
+    <button id="star">별 주기 -</button>
+    <button id="jump">슈퍼점프 +</button>
+    <button id="atk">공격력 +</button>
+    <button id="boss">보스 생성</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const gravity = 0.3;
+    const baseDy = 8;
+    const starSize = 25;
+    const ballSize = 30;
+
+    let defaultFloorReward = 1;
+    let defaultWallReward = 2;
+    let defaultDx = 4;
+    let defaultAtk = 1;
+
+    let costAdd = 10;
+    let costSpeed = 30;
+    let costFloor = 10;
+    let costWall = 8;
+    let costStarRate = 100;
+    let costJumpRate = 200;
+    let costAtk = 25;
+
+    let starSpawnInterval = 30; // seconds
+    let superJumpChance = 0.001;
+    let starTimer = 0;
+    let star = null;
+
+    let balls = [];
+    let gold = 0;
+
+    let bossToggle = false;
+    let boss = null;
+    let bossMaxHp = 100;
+
+    function createBall() {
+      return {
+        x: canvas.width / 2,
+        y: canvas.height * 0.35,
+        dx: (Math.random() < 0.5 ? -1 : 1) * defaultDx,
+        dy: -baseDy,
+        floorReward: defaultFloorReward,
+        wallReward: defaultWallReward,
+        atk: defaultAtk,
+        superJump: false
+      };
+    }
+
+    function spawnStar() {
+      if (!star) {
+        star = { x: canvas.width / 2, y: canvas.height * 0.1, falling: false };
+      }
+    }
+
+    function spawnBoss() {
+      if (!boss) {
+        boss = { x: canvas.width / 2 - 40, y: canvas.height - 82, hp: bossMaxHp, size: 80 };
+      }
+    }
+
+    function update(dt) {
+      starTimer += dt;
+      if (starTimer >= starSpawnInterval) {
+        starTimer = 0;
+        spawnStar();
+      }
+
+      if (star && star.falling) {
+        star.y += 3; // fall speed
+        if (star.y + starSize >= canvas.height) {
+          gold += defaultFloorReward * 100;
+          star = null;
+        }
+      }
+
+      if (bossToggle) {
+        spawnBoss();
+      }
+
+      balls.forEach(ball => {
+        ball.dy += gravity;
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        if (ball.y + ballSize >= canvas.height) {
+          ball.y = canvas.height - ballSize;
+          if (Math.random() < superJumpChance) {
+            ball.dy = -baseDy * 4;
+            ball.superJump = true;
+          } else {
+            ball.dy = -baseDy * (0.8 + Math.random() * 0.4);
+            ball.superJump = false;
+          }
+          gold += ball.floorReward;
+        }
+
+        if (ball.x <= 0) {
+          ball.x = 0;
+          ball.dx *= -(0.8 + Math.random() * 0.4);
+          gold += ball.wallReward;
+        } else if (ball.x + ballSize >= canvas.width) {
+          ball.x = canvas.width - ballSize;
+          ball.dx *= -(0.8 + Math.random() * 0.4);
+          gold += ball.wallReward;
+        }
+
+        if (
+          star &&
+          !star.falling &&
+          ball.superJump &&
+          Math.abs(ball.y - star.y) < starSize &&
+          Math.abs(ball.x - star.x) < starSize
+        ) {
+          star.falling = true; // bug fix: now checks horizontal distance
+        }
+
+        if (
+          boss &&
+          ball.x < boss.x + boss.size &&
+          ball.x + ballSize > boss.x &&
+          ball.y < boss.y + boss.size &&
+          ball.y + ballSize > boss.y
+        ) {
+          boss.hp -= ball.atk;
+          if (boss.hp <= 0) {
+            gold += (defaultFloorReward + defaultWallReward) * 8;
+            bossMaxHp += 50;
+            boss = null;
+          }
+        }
+      });
+
+      draw();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#4c4c4c';
+      ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
+      ctx.fillStyle = '#ff7f33';
+      balls.forEach(ball => {
+        ctx.beginPath();
+        ctx.arc(ball.x + ballSize / 2, ball.y + ballSize / 2, ballSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      if (star) {
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(star.x + starSize / 2, star.y + starSize / 2, starSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (boss) {
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
+      }
+      document.getElementById('gold').textContent = Math.floor(gold);
+      updateButtons();
+    }
+
+    function updateButtons() {
+      document.getElementById('add').textContent = `공 추가\n${balls.length}개\n${Math.round(costAdd)}G`;
+      document.getElementById('speed').textContent = `속도 +\n${Math.round(defaultDx)}\n${Math.round(costSpeed)}G`;
+      document.getElementById('floor').textContent = `땅 보상\n${defaultFloorReward}\n${Math.round(costFloor)}G`;
+      document.getElementById('wall').textContent = `벽 보상\n${defaultWallReward}\n${Math.round(costWall)}G`;
+      document.getElementById('star').textContent = `별 주기\n${starSpawnInterval}s\n${Math.round(costStarRate)}G`;
+      document.getElementById('jump').textContent = `슈퍼점프\n${(superJumpChance*100).toFixed(2)}%\n${Math.round(costJumpRate)}G`;
+      document.getElementById('atk').textContent = `공격력\n${defaultAtk}\n${Math.round(costAtk)}G`;
+      document.getElementById('boss').textContent = bossToggle ? '보스 삭제' : '보스 생성';
+    }
+
+    document.getElementById('add').onclick = () => {
+      if (gold >= costAdd) {
+        gold -= Math.round(costAdd);
+        balls.push(createBall());
+        costAdd *= 1.5;
+      }
+    };
+
+    document.getElementById('speed').onclick = () => {
+      if (gold >= costSpeed) {
+        gold -= Math.round(costSpeed);
+        defaultDx += 1;
+        costSpeed *= 1.3;
+      }
+    };
+
+    document.getElementById('floor').onclick = () => {
+      if (gold >= costFloor) {
+        gold -= Math.round(costFloor);
+        defaultFloorReward += 1;
+        costFloor *= 1.2;
+      }
+    };
+
+    document.getElementById('wall').onclick = () => {
+      if (gold >= costWall) {
+        gold -= Math.round(costWall);
+        defaultWallReward += 1;
+        costWall *= 1.2;
+      }
+    };
+
+    document.getElementById('star').onclick = () => {
+      if (gold >= costStarRate && starSpawnInterval > 1) {
+        gold -= Math.round(costStarRate);
+        starSpawnInterval -= 1;
+        costStarRate *= 2.1;
+      }
+    };
+
+    document.getElementById('jump').onclick = () => {
+      if (gold >= costJumpRate) {
+        gold -= Math.round(costJumpRate);
+        superJumpChance += 0.0001;
+        costJumpRate *= 1.9;
+      }
+    };
+
+    document.getElementById('atk').onclick = () => {
+      if (gold >= costAtk) {
+        gold -= Math.round(costAtk);
+        defaultAtk += 1;
+        costAtk *= 1.6;
+      }
+    };
+
+    document.getElementById('boss').onclick = () => {
+      bossToggle = !bossToggle;
+      if (!bossToggle) {
+        boss = null;
+      }
+    };
+
+    // Initialize
+    balls.push(createBall());
+    let last = performance.now();
+    function frame(time) {
+      const dt = (time - last) / 1000;
+      last = time;
+      update(dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
