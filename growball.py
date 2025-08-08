@@ -129,7 +129,13 @@ class GameArea(Widget):
                 ball.dx *= -random.uniform(0.8, 1.2)
                 self.gold += ball.wall_reward
 
-            if self.star and not self.star.falling and ball.super_jump and abs(ball.y + ball.size - self.star.y) < 25:
+            if (
+                self.star
+                and not self.star.falling
+                and ball.super_jump
+                and abs(ball.y + ball.size - self.star.y) < 25
+                and abs(ball.x - self.star.x) < 25
+            ):
                 self.star.falling = True
 
             if self.boss and abs(ball.x - self.boss.x) < self.boss.size and abs(ball.y - self.boss.y) < self.boss.size:
