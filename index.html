@@ -8,14 +8,21 @@
   <meta name="theme-color" content="#ffffff">
   <style>
     body { margin: 0; font-family: sans-serif; }
-    #panel { margin-top: 4px; }
-    #panel button { margin: 2px; }
+    #hud { text-align: center; margin-top: 8px; }
+    #panel { margin-top: 4px; display: flex; flex-wrap: wrap; justify-content: center; }
+    #panel button {
+      margin: 4px;
+      flex: 1 1 calc(50% - 8px);
+      padding: 12px;
+      font-size: 1.1em;
+      white-space: pre-line;
+    }
     canvas { background: #fff; display: block; }
   </style>
 </head>
 <body>
-  <div>골드: <span id="gold">0</span></div>
-  <canvas id="game" width="1280" height="720"></canvas>
+  <div id="hud">골드: <span id="gold">0</span></div>
+  <canvas id="game"></canvas>
   <div id="panel">
     <button id="add">공 추가</button>
     <button id="speed">속도 +</button>
@@ -29,6 +36,14 @@
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const hudHeight = document.getElementById('hud').offsetHeight;
+      const panelHeight = document.getElementById('panel').offsetHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - hudHeight - panelHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
 
     const gravity = 0.3;
     const baseDy = 4;
@@ -262,6 +277,8 @@
 
     // Initialize
     balls.push(createBall());
+    updateButtons();
+    resizeCanvas();
     let last = performance.now();
     function frame(time) {
       const dt = (time - last) / 1000;
