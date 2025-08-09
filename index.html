@@ -173,6 +173,29 @@
           ball.y < boss.y + boss.size &&
           ball.y + ballSize > boss.y
         ) {
+          const overlapX = Math.min(
+            ball.x + ballSize - boss.x,
+            boss.x + boss.size - ball.x
+          );
+          const overlapY = Math.min(
+            ball.y + ballSize - boss.y,
+            boss.y + boss.size - ball.y
+          );
+          if (overlapX < overlapY) {
+            if (ball.x < boss.x) {
+              ball.x = boss.x - ballSize;
+            } else {
+              ball.x = boss.x + boss.size;
+            }
+            ball.dx *= -(0.8 + Math.random() * 0.4);
+          } else {
+            if (ball.y < boss.y) {
+              ball.y = boss.y - ballSize;
+            } else {
+              ball.y = boss.y + boss.size;
+            }
+            ball.dy *= -(0.8 + Math.random() * 0.4);
+          }
           boss.hp -= ball.atk;
           if (boss.hp <= 0) {
             gold += (defaultFloorReward + defaultWallReward) * 8;
