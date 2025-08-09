@@ -18,6 +18,13 @@
       white-space: pre-line;
     }
     canvas { background: #fff; display: block; }
+    #install {
+      position: fixed;
+      top: 8px;
+      right: 8px;
+      z-index: 1000;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -33,6 +40,7 @@
     <button id="atk">공격력 +</button>
     <button id="boss">보스 생성</button>
   </div>
+  <button id="install">앱 설치</button>
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
@@ -294,6 +302,28 @@
         navigator.serviceWorker.register("sw.js");
       });
     }
+  </script>
+  <script>
+    let deferredPrompt;
+    const installButton = document.getElementById('install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installButton.style.display = 'block';
+    });
+
+    installButton.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installButton.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installButton.style.display = 'none';
+    });
   </script>
 </body>
 </html>
