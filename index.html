@@ -50,6 +50,8 @@
       const panelHeight = document.getElementById('panel').offsetHeight;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight - hudHeight - panelHeight;
+      building.x = canvas.width * 0.6;
+      building.y = canvas.height - building.height - 2;
     }
     window.addEventListener('resize', resizeCanvas);
 
@@ -82,6 +84,8 @@
     let bossToggle = false;
     let boss = null;
     let bossMaxHp = 100;
+
+    const building = { width: 200, height: 200, x: 0, y: 0 };
 
     function createBall() {
       return {
@@ -167,6 +171,37 @@
         }
 
         if (
+          ball.x < building.x + building.width &&
+          ball.x + ballSize > building.x &&
+          ball.y < building.y + building.height &&
+          ball.y + ballSize > building.y
+        ) {
+          const overlapX = Math.min(
+            ball.x + ballSize - building.x,
+            building.x + building.width - ball.x
+          );
+          const overlapY = Math.min(
+            ball.y + ballSize - building.y,
+            building.y + building.height - ball.y
+          );
+          if (overlapX < overlapY) {
+            if (ball.x < building.x) {
+              ball.x = building.x - ballSize;
+            } else {
+              ball.x = building.x + building.width;
+            }
+            ball.dx *= -(0.8 + Math.random() * 0.4);
+          } else {
+            if (ball.y < building.y) {
+              ball.y = building.y - ballSize;
+            } else {
+              ball.y = building.y + building.height;
+            }
+            ball.dy *= -(0.8 + Math.random() * 0.4);
+          }
+        }
+
+        if (
           boss &&
           ball.x < boss.x + boss.size &&
           ball.x + ballSize > boss.x &&
@@ -212,6 +247,8 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#4c4c4c';
       ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
+      ctx.fillStyle = '#a0a0a0';
+      ctx.fillRect(building.x, building.y, building.width, building.height);
       ctx.fillStyle = '#ff7f33';
       balls.forEach(ball => {
         ctx.beginPath();
